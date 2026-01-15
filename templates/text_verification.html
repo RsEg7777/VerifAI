@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VerifAI - Text & Message Verification</title>
+
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/icon3.png') }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    />
+    <style>
+      .text-verification-section {
+        min-height: 100vh;
+        padding: 8rem 2rem 4rem;
+        background: var(--background);
+      }
+
+      .verification-container {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+
+      .page-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        background: linear-gradient(to right, var(--text), var(--primary));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .page-header p {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+      }
+
+      .supported-langs {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .lang-badge {
+        background: rgba(37, 99, 235, 0.1);
+        color: var(--primary);
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+
+      .input-section {
+        background: var(--surface);
+        border-radius: 20px;
+        padding: 2rem;
+        border: 1px solid var(--border);
+        margin-bottom: 2rem;
+      }
+
+      .input-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        color: var(--text);
+        font-weight: 500;
+      }
+
+      .text-input {
+        width: 100%;
+        min-height: 200px;
+        background: var(--background);
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        padding: 1rem;
+        color: var(--text);
+        font-family: inherit;
+        font-size: 1rem;
+        resize: vertical;
+        transition: all 0.3s ease;
+      }
+
+      .text-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+
+      .text-input::placeholder {
+        color: var(--text-secondary);
+      }
+
+      .input-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .detected-lang {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .detected-lang .lang-name {
+        color: var(--primary);
+        font-weight: 500;
+      }
+
+      .verify-btn {
+        background: var(--gradient);
+        color: white;
+        border: none;
+        padding: 1rem 2.5rem;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .verify-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
+      }
+
+      .verify-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+
+      /* Results Section */
+      .results-section {
+        display: none;
+      }
+
+      .results-section.visible {
+        display: block;
+      }
+
+      .verdict-card {
+        background: var(--surface);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        border: 2px solid var(--border);
+      }
+
+      .verdict-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 2rem;
+        border-radius: 30px;
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+
+      .verdict-badge.likely-true {
+        background: rgba(16, 185, 129, 0.15);
+        color: var(--success);
+        border: 2px solid var(--success);
+      }
+
+      .verdict-badge.needs-verification {
+        background: rgba(245, 158, 11, 0.15);
+        color: var(--warning);
+        border: 2px solid var(--warning);
+      }
+
+      .verdict-badge.likely-false {
+        background: rgba(239, 68, 68, 0.15);
+        color: var(--error);
+        border: 2px solid var(--error);
+      }
+
+      .verdict-badge.misinformation {
+        background: rgba(239, 68, 68, 0.2);
+        color: #dc2626;
+        border: 2px solid #dc2626;
+      }
+
+      .score-display {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 0.5rem;
+      }
+
+      .score-label {
+        color: var(--text-secondary);
+        font-size: 1rem;
+      }
+
+      .summary-text {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-top: 1rem;
+        line-height: 1.6;
+      }
+
+      .result-card {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--border);
+      }
+
+      .result-card h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        color: var(--text);
+        font-size: 1.2rem;
+      }
+
+      .claims-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      .claim-item {
+        background: var(--background);
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 0.75rem;
+        border-left: 4px solid var(--border);
+      }
+
+      .claim-item.true { border-left-color: var(--success); }
+      .claim-item.false { border-left-color: var(--error); }
+      .claim-item.misleading { border-left-color: var(--warning); }
+      .claim-item.unverified { border-left-color: var(--secondary); }
+
+      .claim-text {
+        font-weight: 500;
+        color: var(--text);
+        margin-bottom: 0.5rem;
+      }
+
+      .claim-assessment {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 10px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+      }
+
+      .claim-assessment.true { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+      .claim-assessment.false { background: rgba(239, 68, 68, 0.15); color: var(--error); }
+      .claim-assessment.misleading { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+      .claim-assessment.unverified { background: rgba(100, 116, 139, 0.15); color: var(--secondary); }
+
+      .claim-explanation {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .red-flags-list, .recommendations-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      .red-flags-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: rgba(239, 68, 68, 0.05);
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        color: var(--error);
+      }
+
+      .recommendations-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: rgba(37, 99, 235, 0.05);
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+      }
+
+      .recommendations-list li i {
+        color: var(--primary);
+      }
+
+      /* Loading Overlay */
+      .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.9);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .loading-overlay.visible {
+        display: flex;
+      }
+
+      .loading-content {
+        text-align: center;
+      }
+
+      .loading-spinner {
+        width: 64px;
+        height: 64px;
+        border: 4px solid var(--border);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      @media (max-width: 768px) {
+        .page-header h1 {
+          font-size: 2rem;
+        }
+
+        .input-footer {
+          flex-direction: column;
+        }
+
+        .verify-btn {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    {% include 'components/navbar.html' %}
+
+    <main>
+      <section class="text-verification-section">
+        <div class="verification-container">
+          <div class="page-header">
+            <h1><i class="fab fa-whatsapp"></i> Text & Message Verification</h1>
+            <p>Verify WhatsApp forwards, tweets, and social media posts for misinformation</p>
+            <div class="supported-langs">
+              <span class="lang-badge"><i class="fas fa-globe"></i> English</span>
+              <span class="lang-badge"><i class="fas fa-globe"></i> हिंदी (Hindi)</span>
+              <span class="lang-badge"><i class="fas fa-globe"></i> मराठी (Marathi)</span>
+            </div>
+          </div>
+
+          <!-- Input Section -->
+          <div class="input-section">
+            <div class="input-label">
+              <i class="fas fa-paste"></i>
+              <span>Paste your message or forward here</span>
+            </div>
+            <textarea
+              id="text-input"
+              class="text-input"
+              placeholder="Paste your WhatsApp forward, tweet, or any social media text here...
+
+Example:
+🚨 URGENT! Government announced free laptops for all students! Share this message with 10 groups before midnight to claim yours! Don't miss this opportunity! 📱💻"
+              oninput="detectInputLanguage()"
+            ></textarea>
+            <div class="input-footer">
+              <div class="detected-lang" id="detected-lang">
+                <i class="fas fa-language"></i>
+                <span>Detected language: </span>
+                <span class="lang-name" id="lang-name">-</span>
+              </div>
+              <button class="verify-btn" id="verify-btn" onclick="verifyText()">
+                <i class="fas fa-search"></i>
+                Verify Message
+              </button>
+            </div>
+          </div>
+
+          <!-- Results Section -->
+          <div class="results-section" id="results-section">
+            <!-- Verdict Card -->
+            <div class="verdict-card">
+              <div class="verdict-badge" id="verdict-badge">
+                <i class="fas fa-question-circle"></i>
+                <span id="verdict-text">Checking...</span>
+              </div>
+              <div class="score-display"><span id="credibility-score">0</span>%</div>
+              <div class="score-label">Credibility Score</div>
+              <p class="summary-text" id="summary-text"></p>
+            </div>
+
+            <!-- Claims Analysis -->
+            <div class="result-card" id="claims-card">
+              <h3><i class="fas fa-clipboard-list"></i> Claims Analysis</h3>
+              <ul class="claims-list" id="claims-list"></ul>
+            </div>
+
+            <!-- Red Flags -->
+            <div class="result-card" id="red-flags-card" style="display: none;">
+              <h3><i class="fas fa-exclamation-triangle"></i> Red Flags Detected</h3>
+              <ul class="red-flags-list" id="red-flags-list"></ul>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="result-card" id="recommendations-card">
+              <h3><i class="fas fa-lightbulb"></i> Recommendations</h3>
+              <ul class="recommendations-list" id="recommendations-list"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Loading Overlay -->
+      <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-content">
+          <div class="loading-spinner"></div>
+          <p style="font-size: 1.2rem; color: var(--text)">Analyzing Message...</p>
+          <p style="color: var(--text-secondary); margin-top: 0.5rem">Checking for misinformation patterns</p>
+        </div>
+      </div>
+    </main>
+
+    {% include 'components/footer.html' %}
+    
+    <script src="{{ url_for('static', filename='js/utils/NavBar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/utils/verifyText.js') }}"></script>
+  </body>
+</html>

@@ -1,0 +1,27 @@
+flask==3.0.0
+requests==2.31.0
+beautifulsoup4==4.12.2
+trafilatura==1.6.1
+ollama==0.1.5
+flask-mail==0.9.1
+flask-sqlalchemy==3.1.1
+flask-login==0.6.3
+werkzeug==3.0.1
+Pillow>=10.1.0
+
+# Production server
+gunicorn==21.2.0
+python-dotenv==1.0.1
+
+# Feature 5: Multilingual Support
+deep-translator==1.11.4
+langdetect==1.0.9
+
+# Feature 2B: OCR for Meme Detection
+pytesseract>=0.3.13
+opencv-python==4.8.1.78
+numpy==1.26.2
+
+# Optional: Uncomment if using PostgreSQL instead of SQLite
+# psycopg2-binary==2.9.9
+

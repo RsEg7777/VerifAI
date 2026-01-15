@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VerifAI - Search Results</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/search_results.css') }}"
+    />
+  </head>
+  <body>
+    <!-- Add this right after the opening <body> tag -->
+    <div id="loading-spinner" class="loading hidden">
+      <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <p>Analyzing Content</p>
+        <div class="progress-bar">
+          <div class="progress"></div>
+        </div>
+      </div>
+    </div>
+
+    {% include 'components/navbar.html' %}
+
+    <main>
+      <!-- Original News Section -->
+      <section class="original-news">
+        <div class="content-container">
+          <div class="section-header">
+            <h2><i class="fas fa-newspaper"></i> Original Article</h2>
+            <div class="timestamp">
+              Analysis performed on: {{ current_time }}
+            </div>
+          </div>
+          <div class="news-content">{{ original_news }}</div>
+        </div>
+      </section>
+
+      <!-- Analysis Section -->
+      <section class="analysis-section">
+        <div class="content-container">
+          <div class="section-header">
+            <h2><i class="fas fa-shield-alt"></i> Authenticity Analysis</h2>
+            <button
+              id="analyze-button"
+              class="analyze-btn"
+              onclick="analyzeAuthenticity()"
+            >
+              <i class="fas fa-microscope"></i>
+              Analyze Authenticity
+            </button>
+          </div>
+
+          <!-- Analysis Results (initially hidden) -->
+          <div id="analysis-results" class="analysis-results hidden">
+            <div class="score-card">
+              <div class="score-circle">
+                <svg viewBox="0 0 36 36" class="score-chart">
+                  <path
+                    d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                    class="score-background"
+                  />
+                  <path
+                    id="score-path"
+                    d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                    class="score-value"
+                  />
+                </svg>
+                <div class="score-text">
+                  <span id="authenticity-score">0</span>%
+                  <div class="score-label">Authentic</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="analysis-details">
+              <!-- Key Findings Card -->
+              <div class="analysis-card findings">
+                <h3>
+                  <i class="fas fa-search"></i>
+                  <span>Key Findings</span>
+                </h3>
+                <div class="card-content">
+                  <ul id="key-findings-list"></ul>
+                </div>
+              </div>
+
+              <!-- Discrepancies Card -->
+              <div class="analysis-card differences">
+                <h3>
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <span>Discrepancies</span>
+                </h3>
+                <div class="card-content">
+                  <ul id="differences-list"></ul>
+                </div>
+              </div>
+
+              <!-- Supporting Evidence Card -->
+              <div class="analysis-card evidence">
+                <h3>
+                  <i class="fas fa-check-circle"></i>
+                  <span>Supporting Evidence</span>
+                </h3>
+                <div class="card-content">
+                  <ul id="evidence-list"></ul>
+                </div>
+              </div>
+
+              <!-- Claims Analysis Card -->
+              <div class="analysis-card claims">
+                <h3>
+                  <i class="fas fa-clipboard-list"></i>
+                  <span>Claim-by-Claim Analysis</span>
+                </h3>
+                <div class="card-content">
+                  <div id="claims-list" class="claims-container"></div>
+                </div>
+              </div>
+
+              <!-- Bias Detection Card -->
+              <div class="analysis-card bias" id="bias-card" style="display: none;">
+                <h3>
+                  <i class="fas fa-balance-scale"></i>
+                  <span>Bias Detection</span>
+                </h3>
+                <div class="card-content">
+                  <div class="bias-header">
+                    <span class="bias-badge" id="bias-type">None</span>
+                  </div>
+                  <ul id="bias-indicators"></ul>
+                </div>
+              </div>
+
+              <!-- Emotional Manipulation Card -->
+              <div class="analysis-card manipulation" id="manipulation-card" style="display: none;">
+                <h3>
+                  <i class="fas fa-theater-masks"></i>
+                  <span>Emotional Manipulation</span>
+                </h3>
+                <div class="card-content">
+                  <div class="tactics-container">
+                    <strong>Tactics Detected:</strong>
+                    <div id="manipulation-tactics" class="tactics-badges"></div>
+                  </div>
+                  <div class="examples-container">
+                    <strong>Examples:</strong>
+                    <ul id="manipulation-examples"></ul>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sensational Tone Card -->
+              <div class="analysis-card sensational" id="sensational-card" style="display: none;">
+                <h3>
+                  <i class="fas fa-bullhorn"></i>
+                  <span>Sensational Tone Analysis</span>
+                </h3>
+                <div class="card-content">
+                  <div class="sensational-score">
+                    <span>Sensationalism Score:</span>
+                    <div class="score-bar">
+                      <div class="score-fill" id="sensational-score-fill" style="width: 0%"></div>
+                    </div>
+                    <span id="sensational-score-value">0%</span>
+                  </div>
+                  <ul id="sensational-indicators"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Results Section -->
+      <section class="search-results">
+        <div class="content-container">
+          {% for result in search_results %}
+          <div class="result-group">
+            <div class="result-header">
+              <h3><i class="fas fa-search"></i> Related Articles</h3>
+              <div class="result-query">"{{ result.headline }}"</div>
+            </div>
+
+            <div class="news-grid">
+              {% for article in result.articles %}
+              <div class="news-card">
+                <div class="card-media">
+                  {% if article.image_url %}
+                  <img src="{{ article.image_url }}" alt="Article image" />
+                  {% endif %}
+                  <div class="source-badge">
+                    <i class="fas fa-globe"></i> {{ article.source }}
+                  </div>
+                </div>
+                <div class="card-content">
+                  <!-- Source Transparency Panel -->
+                  {% if article.source_info %}
+                  <div class="source-transparency">
+                    <div class="transparency-badges">
+                      <span class="bias-badge" style="background: {{ article.source_info.bias_color }}20; color: {{ article.source_info.bias_color }}; border: 1px solid {{ article.source_info.bias_color }};">
+                        <i class="fas fa-balance-scale"></i> {{ article.source_info.bias_label }}
+                      </span>
+                      <span class="credibility-badge" style="background: {{ article.source_info.credibility_color }}20; color: {{ article.source_info.credibility_color }}; border: 1px solid {{ article.source_info.credibility_color }};">
+                        <i class="fas fa-shield-alt"></i> {{ article.source_info.credibility_label }}
+                      </span>
+                    </div>
+                    {% if article.source_info.description %}
+                    <div class="source-description">
+                      <i class="fas fa-info-circle"></i> {{ article.source_info.description }}
+                    </div>
+                    {% endif %}
+                  </div>
+                  {% endif %}
+                  <h4>{{ article.title }}</h4>
+                  <div class="article-meta">
+                    {% if article.author %}
+                    <span
+                      ><i class="fas fa-user"></i> {{ article.author }}</span
+                    >
+                    {% endif %} {% if article.formatted_date %}
+                    <span
+                      ><i class="far fa-calendar"></i> {{ article.formatted_date
+                      }}</span
+                    >
+                    {% endif %}
+                  </div>
+                  <p class="description">{{ article.description }}</p>
+                  <div class="card-actions">
+                    <a
+                      href="{{ article.url }}"
+                      target="_blank"
+                      class="read-more"
+                    >
+                      Read Full Article <i class="fas fa-external-link-alt"></i>
+                    </a>
+                    {% if current_user.is_authenticated %}
+                    <button
+                      class="save-article-btn"
+                      data-url="{{ article.url }}"
+                      data-title="{{ article.title }}"
+                      data-content="{{ article.description }}"
+                      data-source="{{ article.source }}"
+                      data-image="{{ article.image_url }}"
+                      onclick="saveArticle('{{ article.url }}', '{{ article.title }}', '{{ article.description }}', '{{ article.source }}', '{{ article.image_url }}')"
+                    >
+                      <i class="far fa-bookmark"></i> Save Article
+                    </button>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %} {% if not search_results %}
+          <div class="no-results">
+            <i class="fas fa-search-minus"></i>
+            <p>No matching articles found for the provided headlines.</p>
+          </div>
+          {% endif %}
+        </div>
+      </section>
+    </main>
+
+    {% include 'components/footer.html' %}
+
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/search_results.js') }}"
+    ></script>
+    <script src="{{ url_for('static', filename='js/utils/NavBar.js') }}"></script>
+  </body>
+</html>
+
