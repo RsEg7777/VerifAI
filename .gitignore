@@ -60,3 +60,7 @@ instance/
 
 # Submodules or nested repos
 VerifAi/
+
+# Vercel
+.vercel
+.vercel/*
