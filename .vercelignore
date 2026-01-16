@@ -1,0 +1,83 @@
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Database files
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# Documentation (not needed for runtime)
+README.md
+VERCEL_DEPLOYMENT.md
+LICENCE
+*.md
+
+# Test files
+test/
+tests/
+*_test.py
+test_*.py
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Vercel
+.vercel/
+
+# Large data files
+*.csv
+*.json
+*.xml
+
+# Static assets that might be large (if not needed)
+# Uncomment if you have large images/videos
+# static/images/
+# static/videos/
+
+# Submodules
+VerifAi/
+
+# Temporary files
+*.tmp
+*.temp
+=0.25.2
