@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for
-import ollama
 import requests
 import json
 from bs4 import BeautifulSoup
@@ -24,6 +23,15 @@ try:
 except ImportError:
     MULTILINGUAL_ENABLED = False
     print("Warning: langdetect or deep-translator not installed. Multilingual support disabled.")
+
+# Ollama LLM support (optional - for local development)
+try:
+    import ollama
+    OLLAMA_ENABLED = True
+except ImportError:
+    OLLAMA_ENABLED = False
+    ollama = None
+    print("Warning: ollama not installed. LLM features will use fallback methods.")
 
 # OCR support imports for meme/quote detection
 try:
@@ -281,6 +289,11 @@ def api_translate():
         return jsonify({'error': str(e)}), 500
 
 def extract_key_phrases_with_ollama(text):
+    if not OLLAMA_ENABLED or ollama is None:
+        # Fallback: simple extraction without LLM
+        words = text.split()[:30]  # Take first 30 words
+        return {"news_headline": [" ".join(words[i:i+10]) for i in range(0, min(30, len(words)), 10)][:3]}
+    
     prompt = f"""
         You are a professional news analyst.
         Please extract 3 concise headlines from the following news article. 
@@ -601,6 +614,10 @@ def analyze_authenticity(original_news, verified_articles):
     """
 
     try:
+        if not OLLAMA_ENABLED or ollama is None:
+            # Fallback response when Ollama is not available
+            return create_error_response("LLM service not available. Please configure Ollama or use a cloud LLM service.")
+        
         # Call the LLM with enhanced analysis prompt
         response = ollama.chat(model='llama3.2', messages=[
             {
@@ -1017,6 +1034,18 @@ def verify_text_with_llama(text, original_lang='en'):
     """
     
     try:
+        if not OLLAMA_ENABLED or ollama is None:
+            # Fallback response when Ollama is not available
+            return jsonify({
+                'error': 'LLM service not available. Please configure Ollama or use a cloud LLM service.',
+                'credibility_score': 50,
+                'verdict': 'Needs Verification',
+                'claims': [],
+                'red_flags': ['LLM service unavailable'],
+                'recommendations': ['Configure Ollama locally or use a cloud LLM service'],
+                'summary': 'Unable to perform full analysis - LLM service not configured'
+            }), 503
+        
         response = ollama.chat(model='llama3.2', messages=[
             {
                 "role": "system",

@@ -28,6 +28,14 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-me')
 
     # Database configuration
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///newsguard.db')
+    # For Vercel/serverless: Use in-memory SQLite or PostgreSQL
+    # SQLite files don't persist on serverless functions
+    database_url = os.environ.get('DATABASE_URL', 'sqlite:///newsguard.db')
+    
+    # If on Vercel and no DATABASE_URL is set, use in-memory SQLite
+    if os.environ.get('VERCEL') and not os.environ.get('DATABASE_URL'):
+        database_url = 'sqlite:///:memory:'
+    
+    SQLALCHEMY_DATABASE_URI = database_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
